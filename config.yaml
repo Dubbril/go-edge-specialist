@@ -1,0 +1,11 @@
+sftp:
+  host: 'localhost'
+  port: 22
+  username: 'edge'
+  password: 'edge@1234'
+  remoteDir: '/home/edge/inbox/edw/archive/'
+  localDir: 'C:\Users\dubbril\Desktop\remote\'
+
+keysToMask:
+  - key
+  - data
