@@ -1,3 +1,11 @@
+// Function to reload the page
+function reloadPage() {
+    location.reload(true); // Reload the page and ignore the cache
+}
+
+// Reload the page every 2 minutes (120000 milliseconds)
+setTimeout(reloadPage, 600000);
+
 function generateGUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -9,18 +17,16 @@ function generateGUID() {
 function submitReadSpecialistForm(formId) {
     this.event.preventDefault();
     const form = document.getElementById(formId);
-    const formData = new FormData(form);
-    const data = new FormData();
 
-    formData.forEach((value, key) => {
-        data.append(key, value)
-    });
+    const selectElement = document.getElementById('env');
+    const selectedValue = selectElement.value;
+    let url = form.action + '?selectEnv=' + selectedValue;
 
     let guid = generateGUID();
-    fetch(form.action, {
+    fetch(url, {
         method: form.method, headers: {
             'x-correlation-id': guid
-        }, body: data,
+        }
     })
         .then(response => {
                 if (response.status === 500) {
@@ -236,8 +242,11 @@ function exportSpecialist() {
     // Prevent default form submission
     this.event.preventDefault();
 
+    const selectElement = document.getElementById('env');
+    const selectedValue = selectElement.value;
+    let url = '/api/v1/specialist/export?selectEnv=' + selectedValue;
 
-    fetch('/api/v1/specialist/export', {
+    fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

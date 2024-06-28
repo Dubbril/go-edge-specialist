@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-edge-specailist/models"
 	"go-edge-specailist/services"
@@ -16,13 +17,16 @@ func NewSpecialistController(specialistService *services.SpecialistService) *Spe
 }
 
 func (ctrl *SpecialistController) ReadSpecialist(c *gin.Context) {
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing file parameter", "status": "Fail"})
-		return
-	}
+	selectEnv := c.Query("selectEnv")
+	fmt.Println(selectEnv)
 
-	err = ctrl.SpecialistService.ReadSpecialist(file)
+	//file, err := c.FormFile("file")
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "Missing file parameter", "status": "Fail"})
+	//	return
+	//}
+
+	err := ctrl.SpecialistService.ReadSpecialist(selectEnv)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "status": "Fail"})
 		return
@@ -31,7 +35,10 @@ func (ctrl *SpecialistController) ReadSpecialist(c *gin.Context) {
 }
 
 func (ctrl *SpecialistController) ExportSpecialist(c *gin.Context) {
-	err := ctrl.SpecialistService.ExportSpecialist()
+	selectEnv := c.Query("selectEnv")
+	fmt.Println(selectEnv)
+
+	err := ctrl.SpecialistService.ExportSpecialist(selectEnv)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error on export specialist with error " + err.Error(), "status": "Fail"})
 		return

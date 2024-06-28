@@ -22,7 +22,7 @@ func main() {
 	// Register Specialist Controller
 	specialistService := services.NewSpecialistService()
 	specialistController := controllers.NewSpecialistController(specialistService)
-	router.POST("/api/v1/specialist/read", specialistController.ReadSpecialist)
+	router.GET("/api/v1/specialist/read", specialistController.ReadSpecialist)
 	router.GET("/api/v1/specialist/query", specialistController.FindByCustomerNo)
 	router.POST("/api/v1/specialist/save", specialistController.SaveSpecialist)
 	router.DELETE("/api/v1/specialist/delete", specialistController.DeleteByIndex)

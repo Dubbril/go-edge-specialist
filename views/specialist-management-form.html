@@ -1,9 +1,14 @@
 <h3 class="text-lg font-bold text-green-500 dark:text-white mb-2 ">Specialist Management</h3>
-<form id="specialistReadForm" action="/api/v1/specialist/read" method="post"
+<form id="specialistReadForm" action="/api/v1/specialist/read" method="get"
       onsubmit="submitReadSpecialistForm('specialistReadForm')">
     <div class="p-2 mb-2">
-        <label for="file">Browse Last File Of Specialist :</label>
-        <input type="file" id="file" name="file" class="border p-2 mb-2 w-1/2" required>
+        <label for="env">Choose a color:</label>
+        <select name="env" id="env" class="border p-2 mb-2 w-1/4">
+            <option value="dev" class="bg-green-500" >Dev</option>
+            <option value="uat" class="bg-orange-500">UAT</option>
+            <option value="pre" class="bg-red-500" >Pre-Prod</option>
+        </select>
+
         <button type="submit" class="bg-sky-500 text-white px-4 py-2 rounded-lg">Read Data</button>
         <button onclick="exportSpecialist()" style="display: none" id="ExportSpecialist" name="ExportSpecialist"
                 type="button" class="bg-sky-500 text-white px-4 py-2 rounded-lg">

@@ -1,10 +1,22 @@
 sftp:
-  host: 'localhost'
-  port: 22
-  username: 'edge'
-  password: 'edge@1234'
+  dev:
+    host: 'localhost'
+    port: 22
+    username: 'edge'
+    password: 'edge@1234'
+  uat:
+    host: 'localhost'
+    port: 22
+    username: 'edge'
+    password: 'password'
+  pre:
+    host: 'localhost'
+    port: 22
+    username: 'edge'
+    password: 'password'
   remoteDir: '/home/edge/inbox/edw/archive/'
-  localDir: 'C:\Users\dubbril\Desktop\remote\'
+  localDir: '/Users/dubbril/Desktop/x/'
+  export: '/home/edge/edw/outbox/process/'
 
 keysToMask:
   - key
