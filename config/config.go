@@ -12,18 +12,6 @@ var (
 	mappingConfig *MappingConfig
 )
 
-//type MappingConfig struct {
-//	Sftp struct {
-//		Host      string `mapstructure:"host"`
-//		Port      int    `mapstructure:"port"`
-//		Username  string `mapstructure:"username"`
-//		Password  string `mapstructure:"password"`
-//		RemoteDir string `mapstructure:"remoteDir"`
-//		LocalDir  string `mapstructure:"localDir"`
-//		Export    string `mapstructure:"export"`
-//	} `mapstructure:"sftp"`
-//}
-
 type SftpConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
@@ -48,6 +36,19 @@ func GetConfig() *MappingConfig {
 	})
 
 	return mappingConfig
+}
+
+func GetEnvSiteData(envReq string) (config SftpConfig, err error) {
+	switch envReq {
+	case "dev":
+		return mappingConfig.Sftp.Dev, nil
+	case "uat":
+		return mappingConfig.Sftp.Uat, nil
+	case "pre":
+		return mappingConfig.Sftp.Pre, nil
+	default:
+		return config, fmt.Errorf("invalid env value: %s", envReq)
+	}
 }
 
 func loadConfig() *MappingConfig {

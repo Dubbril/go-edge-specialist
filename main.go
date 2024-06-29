@@ -29,7 +29,7 @@ func main() {
 	router.GET("/api/v1/specialist/export", specialistController.ExportSpecialist)
 
 	// Open browser on start
-	inits.OpenBrowser("http://localhost:8083")
+	//inits.OpenBrowser("http://localhost:8083")
 
 	// Run the server on port 8080
 	err := router.Run(":8083")

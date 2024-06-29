@@ -28,8 +28,12 @@ type SpecialistRequest struct {
 }
 
 // NewSpecialistRequest creates a new SpecialistRequest from a data line.
-func NewSpecialistRequest(dataLine string, index int) *SpecialistRequest {
+func NewSpecialistRequest(dataLine string, index int) (*SpecialistRequest, error) {
 	dataFields := strings.Split(dataLine, "|")
+
+	if len(dataFields) != 17 {
+		return nil, fmt.Errorf("invalid data length on split with '|' \n %s", dataLine)
+	}
 
 	rowNo := dataFields[0]
 	if index > 0 {
@@ -54,7 +58,7 @@ func NewSpecialistRequest(dataLine string, index int) *SpecialistRequest {
 		ReasonCode:     dataFields[14],
 		RtnCustomer:    dataFields[15],
 		SrcSeq:         dataFields[16],
-	}
+	}, nil
 }
 
 // String returns a string representation of the SpecialistRequest.

@@ -1,132 +1,152 @@
-<h3 class="text-lg font-bold text-green-500 dark:text-white mb-2 ">Specialist Management</h3>
-<form id="specialistReadForm" action="/api/v1/specialist/read" method="get"
-      onsubmit="submitReadSpecialistForm('specialistReadForm')">
-    <div class="p-2 mb-2">
-        <label for="env">Choose a color:</label>
-        <select name="env" id="env" class="border p-2 mb-2 w-1/4">
-            <option value="dev" class="bg-green-500" >Dev</option>
-            <option value="uat" class="bg-orange-500">UAT</option>
-            <option value="pre" class="bg-red-500" >Pre-Prod</option>
-        </select>
-
-        <button type="submit" class="bg-sky-500 text-white px-4 py-2 rounded-lg">Read Data</button>
-        <button onclick="exportSpecialist()" style="display: none" id="ExportSpecialist" name="ExportSpecialist"
-                type="button" class="bg-sky-500 text-white px-4 py-2 rounded-lg">
-            Export to path "/home/edw/outbox/edge"
-        </button>
-    </div>
-</form>
-
-<div id="specialistProcess" style="display: none">
-    <form id="specialistQueryForm" action="/api/v1/specialist/query" method="get"
-          onsubmit="submitQuerySpecialistForm('specialistQueryForm')">
-        <div class="p-2 mb-2">
-            <label for="customerNoFilter">Customer No</label>
-            <input type="text" id="customerNoFilter" name="customerNoFilter" class="border p-2 mb-2 w-1/4">
-            <button name="btnQuery" type="submit" class="bg-teal-500 text-white px-4 py-2 rounded-lg">Query</button>
+<!--<h3 class="text-lg font-bold text-green-500 dark:text-white mb-2 ">Specialist Management</h3>-->
+<div class="container mx-auto p-4 mb-2 bg-white shadow-md rounded-lg">
+    <form id="specialistReadForm" action="/api/v1/specialist/read" method="get"
+          onsubmit="submitReadSpecialistForm('specialistReadForm')">
+        <div class="flex items-center space-x-4">
+            <label for="env" class="font-bold">Choose environment:</label>
+            <div class="relative">
+                <select name="env" id="env"
+                        class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg shadow leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="dev">Develop</option>
+                    <option value="uat">UAT</option>
+                    <option value="pre">Pre-Prod</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M7 10l5 5 5-5H7z"/>
+                    </svg>
+                </div>
+            </div>
+            <button type="submit" class="bg-sky-500 text-white px-4 py-2 rounded-lg">Read Data</button>
         </div>
     </form>
-    <button onclick="newSpecialist()" name="btnNewSpecialist" type="submit"
-            class="bg-green-500 text-white px-4 py-2 rounded-lg">New Specialist
-    </button>
-    <button onclick="cancelSpecialist()" name="CancelSpecialist" type="submit"
-            class="bg-orange-500 text-white px-4 py-2 rounded-lg">Cancel
-    </button>
 </div>
 
-<div id="specialistDataTable" style="display: none">
-    <div class="container mx-auto p-4">
-        <div class="flex space-x-4">
-            <div class="flex flex-col w-1/4">
-                <label for="RowNo" class="block text-sm font-medium text-gray-700">RowNo</label>
-                <input disabled type="text" id="RowNo" name="RowNo" class="border p-2 w-full"/>
+<div id="tabProcessData" style="display: none;" class="container mx-auto p-12 mb-4 bg-white shadow-md rounded-lg">
+    <div>
+        <form id="specialistQueryForm" action="/api/v1/specialist/query" method="get"
+              onsubmit="submitQuerySpecialistForm('specialistQueryForm')">
+            <div class="p-2 mb-2">
+                <label for="customerNoFilter" class="font-bold">Customer No:</label>
+                <input type="text" id="customerNoFilter" name="customerNoFilter" class="border p-2 mb-2 w-1/4">
+                <button name="btnQuery" type="submit" class="bg-teal-500 text-white px-4 py-2 rounded-lg">Query</button>
             </div>
-            <div class="flex flex-col w-1/4">
-                <label for="CustomerNo" class="block text-sm font-medium text-red-500">CustomerNo</label>
-                <input type="text" id="CustomerNo" name="CustomerNo" class="border p-2 w-full text-red-500"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="CustomerNameTh" class="block text-sm font-medium text-red-500">CustomerNameTh</label>
-                <input type="text" id="CustomerNameTh" name="CustomerNameTh" class="border p-2 w-full text-red-500"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="ChkThaiName" class="block text-sm font-medium text-red-500">ChkThaiName</label>
-                <input type="text" id="ChkThaiName" name="ChkThaiName" class="border p-2 w-full text-red-500"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="ChkEngName" class="block text-sm font-medium text-gray-700">ChkEngName</label>
-                <input type="text" id="ChkEngName" name="ChkEngName" class="border p-2 w-full"/>
+        </form>
+        <button onclick="newSpecialist()" name="btnNewSpecialist" type="submit"
+                class="bg-green-500 text-white px-4 py-2 rounded-lg">New Specialist
+        </button>
+        <button onclick="cancelSpecialist()" name="CancelSpecialist" type="submit"
+                class="bg-orange-500 text-white px-4 py-2 rounded-lg">Clear Form
+        </button>
+    </div>
+    <div id="specialistDataTable" style="display: none">
+        <div class="container mx-auto p-4">
+            <div class="flex space-x-4">
+                <div class="flex flex-col w-1/4">
+                    <label for="RowNo" class="block text-sm font-medium text-gray-700 font-bold">RowNo</label>
+                    <input disabled type="text" id="RowNo" name="RowNo" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="CustomerNo" class="block text-sm font-medium text-red-500">CustomerNo*</label>
+                    <input type="text" id="CustomerNo" name="CustomerNo" class="border p-2 w-full text-red-500"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="CustomerNameTh" class="block text-sm font-medium text-red-500">CustomerNameTh*</label>
+                    <input type="text" id="CustomerNameTh" name="CustomerNameTh"
+                           class="border p-2 w-full text-red-500"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="ChkThaiName" class="block text-sm font-medium text-red-500">ChkThaiName*</label>
+                    <input type="text" id="ChkThaiName" name="ChkThaiName" class="border p-2 w-full text-red-500"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="ChkEngName" class="block text-sm font-medium text-gray-700">ChkEngName</label>
+                    <input type="text" id="ChkEngName" name="ChkEngName" class="border p-2 w-full"/>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="container mx-auto p-4">
-        <div class="flex space-x-4">
-            <div class="flex flex-col w-1/4">
-                <label for="CustomerNameEn" class="block text-sm font-medium text-gray-700">CustomerNameEn</label>
-                <input type="text" id="CustomerNameEn" name="CustomerNameEn" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="Dob" class="block text-sm font-medium text-gray-700">Dob</label>
-                <input type="text" id="Dob" name="Dob" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="CountryCode" class="block text-sm font-medium text-gray-700">CountryCode</label>
-                <input type="text" id="CountryCode" name="CountryCode" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="CustomerType" class="block text-sm font-medium text-gray-700">CustomerType</label>
-                <input type="text" id="CustomerType" name="CustomerType" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="Zipcode" class="block text-sm font-medium text-gray-700">Zipcode</label>
-                <input type="text" id="Zipcode" name="Zipcode" class="border p-2 w-full"/>
-            </div>
-        </div>
-    </div>
-    <div class="container mx-auto p-4">
-        <div class="flex space-x-4">
-            <div class="flex flex-col w-1/4">
-                <label for="Action" class="block text-sm font-medium text-gray-700">Action</label>
-                <input type="text" id="Action" name="Action" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="OldAct" class="block text-sm font-medium text-gray-700">OldAct</label>
-                <input type="text" id="OldAct" name="OldAct" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="Ovract" class="block text-sm font-medium text-gray-700">Ovract</label>
-                <input type="text" id="Ovract" name="Ovract" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="Pob" class="block text-sm font-medium text-gray-700">Pob</label>
-                <input type="text" id="Pob" name="Pob" class="border p-2 w-full"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="ReasonCode" class="block text-sm font-medium text-red-500">ReasonCode</label>
-                <input type="text" id="ReasonCode" name="ReasonCode" class="border p-2 w-full text-red-500 "/>
+        <div class="container mx-auto p-4">
+            <div class="flex space-x-4">
+                <div class="flex flex-col w-1/4">
+                    <label for="CustomerNameEn" class="block text-sm font-medium text-gray-700">CustomerNameEn</label>
+                    <input type="text" id="CustomerNameEn" name="CustomerNameEn" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="Dob" class="block text-sm font-medium text-gray-700">Dob</label>
+                    <input type="text" id="Dob" name="Dob" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="CountryCode" class="block text-sm font-medium text-gray-700">CountryCode</label>
+                    <input type="text" id="CountryCode" name="CountryCode" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="CustomerType" class="block text-sm font-medium text-gray-700">CustomerType</label>
+                    <input type="text" id="CustomerType" name="CustomerType" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="Zipcode" class="block text-sm font-medium text-gray-700">Zipcode</label>
+                    <input type="text" id="Zipcode" name="Zipcode" class="border p-2 w-full"/>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="container mx-auto p-4">
-        <div class="flex space-x-4">
-            <div class="flex flex-col w-1/4">
-                <label for="RtnCustomer" class="block text-sm font-medium text-red-500">RtnCustomer</label>
-                <input type="text" id="RtnCustomer" name="RtnCustomer" class="border p-2 w-full text-red-500"/>
-            </div>
-            <div class="flex flex-col w-1/4">
-                <label for="SrcSeq" class="block text-sm font-medium text-gray-700">SrcSeq</label>
-                <input type="text" id="SrcSeq" name="SrcSeq" class="border p-2 w-full"/>
+        <div class="container mx-auto p-4">
+            <div class="flex space-x-4">
+                <div class="flex flex-col w-1/4">
+                    <label for="Action" class="block text-sm font-medium text-gray-700">Action</label>
+                    <input type="text" id="Action" name="Action" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="OldAct" class="block text-sm font-medium text-gray-700">OldAct</label>
+                    <input type="text" id="OldAct" name="OldAct" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="Ovract" class="block text-sm font-medium text-gray-700">Ovract</label>
+                    <input type="text" id="Ovract" name="Ovract" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="Pob" class="block text-sm font-medium text-gray-700">Pob</label>
+                    <input type="text" id="Pob" name="Pob" class="border p-2 w-full"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="ReasonCode" class="block text-sm font-medium text-red-500">ReasonCode*</label>
+                    <input type="text" id="ReasonCode" name="ReasonCode" class="border p-2 w-full text-red-500 "/>
+                </div>
             </div>
         </div>
+        <div class="container mx-auto p-4">
+            <div class="flex space-x-4">
+                <div class="flex flex-col w-1/4">
+                    <label for="RtnCustomer" class="block text-sm font-medium text-red-500">RtnCustomer*</label>
+                    <input type="text" id="RtnCustomer" name="RtnCustomer" class="border p-2 w-full text-red-500"/>
+                </div>
+                <div class="flex flex-col w-1/4">
+                    <label for="SrcSeq" class="block text-sm font-medium text-gray-700">SrcSeq</label>
+                    <input type="text" id="SrcSeq" name="SrcSeq" class="border p-2 w-full"/>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="saveSpecialist()" name="SaveSpecialist" type="submit"
+                class="bg-teal-500 text-white px-4 py-2 rounded-lg">
+            Save
+        </button>
+        <button id="btnDelete" onclick="deleteSpecialist()" name="DeleteSpecialist" type="submit"
+                class="bg-red-500 text-white px-4 py-2 rounded-lg">
+            Delete
+        </button>
     </div>
-    <button onclick="saveSpecialist()" name="SaveSpecialist" type="submit"
-            class="bg-teal-500 text-white px-4 py-2 rounded-lg">
-        Save
-    </button>
-    <button onclick="deleteSpecialist()" name="DeleteSpecialist" type="submit"
-            class="bg-red-500 text-white px-4 py-2 rounded-lg">
-        Delete
-    </button>
+
 </div>
+
+<div style="display: none" id="tabCreateFile" class="container mx-auto p-12 bg-white shadow-md rounded-lg">
+    <div class="flex items-center space-x-4">
+        <button onclick="exportSpecialist()" id="ExportSpecialist" name="ExportSpecialist"
+                type="button" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+            Export To Create File For Batch To Deb Acquisition
+        </button>
+    </div>
+</div>
+
+
 
 

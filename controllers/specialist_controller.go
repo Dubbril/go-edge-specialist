@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-edge-specailist/models"
 	"go-edge-specailist/services"
@@ -18,13 +17,10 @@ func NewSpecialistController(specialistService *services.SpecialistService) *Spe
 
 func (ctrl *SpecialistController) ReadSpecialist(c *gin.Context) {
 	selectEnv := c.Query("selectEnv")
-	fmt.Println(selectEnv)
-
-	//file, err := c.FormFile("file")
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": "Missing file parameter", "status": "Fail"})
-	//	return
-	//}
+	if selectEnv == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "selectEnv is empty"})
+		return
+	}
 
 	err := ctrl.SpecialistService.ReadSpecialist(selectEnv)
 	if err != nil {
@@ -36,7 +32,10 @@ func (ctrl *SpecialistController) ReadSpecialist(c *gin.Context) {
 
 func (ctrl *SpecialistController) ExportSpecialist(c *gin.Context) {
 	selectEnv := c.Query("selectEnv")
-	fmt.Println(selectEnv)
+	if selectEnv == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "selectEnv is empty"})
+		return
+	}
 
 	err := ctrl.SpecialistService.ExportSpecialist(selectEnv)
 	if err != nil {
@@ -47,7 +46,6 @@ func (ctrl *SpecialistController) ExportSpecialist(c *gin.Context) {
 }
 
 func (ctrl *SpecialistController) SaveSpecialist(c *gin.Context) {
-	// Bine @RequestBody @Valid AesRequest aesRequest in java
 	var specialistReq models.SpecialistRequest
 	if err := c.ShouldBindJSON(&specialistReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "status": "Fail"})

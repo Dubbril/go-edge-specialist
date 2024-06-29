@@ -16,6 +16,12 @@ function generateGUID() {
 // Action Submit Specialist Make
 function submitReadSpecialistForm(formId) {
     this.event.preventDefault();
+
+
+    document.getElementById('tabProcessData').style.display = 'none';
+    cancelSpecialist()
+    document.getElementById('tabCreateFile').style.display = 'none';
+
     const form = document.getElementById(formId);
 
     const selectElement = document.getElementById('env');
@@ -37,8 +43,8 @@ function submitReadSpecialistForm(formId) {
         )
         .then(result => {
             if (result.status === 'Success') {
-                document.getElementById('specialistProcess').style.display = 'block';
-                document.getElementById('ExportSpecialist').style.display = 'block';
+                document.getElementById('tabProcessData').style.display = 'block';
+                document.getElementById('tabCreateFile').style.display = 'block';
                 alert('Successfully');
             } else {
                 alert("Something went wrong !!! " + result.error)
@@ -96,6 +102,7 @@ function submitQuerySpecialistForm(formId) {
                 document.getElementById('ReasonCode').value = result.ReasonCode;
                 document.getElementById('RtnCustomer').value = result.RtnCustomer;
                 document.getElementById('SrcSeq').value = result.SrcSeq;
+                document.getElementById('btnDelete').disabled = false;
             } else {
                 alert("Data not found")
                 document.getElementById('specialistDataTable').style.display = 'none';
@@ -152,6 +159,7 @@ function defaultNewSpecialistForm() {
 
 function newSpecialist() {
     document.getElementById('specialistDataTable').style.display = 'block';
+    document.getElementById('btnDelete').disabled = true;
     defaultNewSpecialistForm()
 }
 
@@ -183,7 +191,7 @@ function saveSpecialist() {
         })
         .then(result => {
             if (result.status === 'Success') {
-                document.getElementById('specialistProcess').style.display = 'block';
+                document.getElementById('tabProcessData').style.display = 'block';
                 alert('Successfully');
                 cancelSpecialist()
             } else {
@@ -220,7 +228,7 @@ function deleteSpecialist() {
         })
         .then(result => {
             if (result.status === 'Success') {
-                document.getElementById('specialistProcess').style.display = 'block';
+                document.getElementById('tabProcessData').style.display = 'block';
                 alert('Successfully');
                 cancelSpecialist()
             } else {
@@ -260,9 +268,10 @@ function exportSpecialist() {
         })
         .then(result => {
             if (result.status === 'Success') {
-                document.getElementById('specialistProcess').style.display = 'block';
+                document.getElementById('tabProcessData').style.display = 'none';
                 alert('Successfully');
                 cancelSpecialist()
+                document.getElementById('tabCreateFile').style.display = 'none';
             } else {
                 alert("Something went wrong !!! " + result.error)
             }

@@ -5,13 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pkg/sftp"
+	"github.com/rs/zerolog/log"
 	"go-edge-specailist/config"
 	"go-edge-specailist/models"
 	"golang.org/x/crypto/ssh"
+	"io"
 	"os"
-	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -26,8 +29,7 @@ func NewSpecialistService() *SpecialistService {
 func (s SpecialistService) ReadSpecialist(selectEnv string) error {
 
 	// Retrieve data from sftp
-	sftpClientService := NewSftpClientService()
-	specialist, err := sftpClientService.DownloadLastFileOfSpecialist(selectEnv)
+	specialist, err := downloadLastFileOfSpecialist(selectEnv)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve data : %s", err)
 	}
@@ -50,8 +52,11 @@ func (s SpecialistService) ReadSpecialist(selectEnv string) error {
 	var specialistReqSlice []models.SpecialistRequest
 	for scanner.Scan() {
 		readLine := scanner.Text()
-		fmt.Println(readLine)
-		specialistReq := models.NewSpecialistRequest(readLine, rowNo)
+		specialistReq, err := models.NewSpecialistRequest(readLine, rowNo)
+		if err != nil {
+			return err
+		}
+
 		specialistReqSlice = append(specialistReqSlice, *specialistReq)
 		rowNo++
 	}
@@ -66,6 +71,123 @@ func (s SpecialistService) ReadSpecialist(selectEnv string) error {
 
 	dataSpecialist = &specialistReqSlice
 	return nil
+}
+
+func downloadLastFileOfSpecialist(envReq string) (*models.SftpInfo, error) {
+	var sftpInfo *models.SftpInfo
+	getConfig := config.GetConfig()
+
+	selectedEnv, err := config.GetEnvSiteData(envReq)
+	if err != nil {
+		return nil, err
+	}
+
+	// Establish an SSH connection
+	configSftp := &ssh.ClientConfig{
+		User: selectedEnv.Username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(selectedEnv.Password),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", selectedEnv.Host, selectedEnv.Port), configSftp)
+	if err != nil {
+		log.Error().Err(err).Msg("Error connecting to SSH:")
+		return nil, err
+	}
+	defer func(conn *ssh.Client) {
+		err := conn.Close()
+		if err != nil {
+			return
+		}
+	}(conn)
+
+	// Create an SFTP client
+	sftpClient, err := sftp.NewClient(conn)
+	if err != nil {
+		log.Error().Err(err).Msg("Error creating SFTP client:")
+		return nil, err
+	}
+	defer func(sftpClient *sftp.Client) {
+		err := sftpClient.Close()
+		if err != nil {
+			return
+		}
+	}(sftpClient)
+
+	// List files in the remote directory
+	files, err := sftpClient.ReadDir(getConfig.Sftp.RemoteDir)
+	if err != nil {
+		log.Error().Err(err).Msg("Error listing remote directory:")
+		return nil, err
+	}
+
+	// Filter files starting with "EIM_EDGE_BLACKLIST"
+	filteredFiles := make([]os.FileInfo, 0)
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), "EIM_EDGE_BLACKLIST") {
+			filteredFiles = append(filteredFiles, file)
+		}
+	}
+
+	// Sort filtered files by filename
+	sort.Slice(filteredFiles, func(i, j int) bool {
+		return strings.Compare(filteredFiles[i].Name(), filteredFiles[j].Name()) > 0
+	})
+
+	// Download the latest file
+	if len(filteredFiles) > 0 {
+		latestFile := filteredFiles[0]
+		remoteFilePath := getConfig.Sftp.RemoteDir + latestFile.Name()
+		localFilePath := getConfig.Sftp.LocalDir + latestFile.Name()
+
+		// Open the remote file for reading
+		remoteFile, err := sftpClient.Open(remoteFilePath)
+		if err != nil {
+			log.Error().Err(err).Msg("Error opening remote file:")
+			return nil, err
+		}
+		defer func(remoteFile *sftp.File) {
+			err := remoteFile.Close()
+			if err != nil {
+				return
+			}
+		}(remoteFile)
+
+		// Create the local file for writing
+		localFile, err := os.Create(localFilePath)
+		if err != nil {
+			log.Error().Err(err).Msg("Error creating local file:")
+			return nil, err
+		}
+		defer func(localFile *os.File) {
+			err := localFile.Close()
+			if err != nil {
+				return
+			}
+		}(localFile)
+
+		// Copy the contents from the remote file to the local file
+		_, err = io.Copy(localFile, remoteFile)
+		if err != nil {
+			log.Error().Err(err).Msg("Error copying file contents:")
+			return nil, err
+		}
+
+		sftpInfoData := models.SftpInfo{FileName: latestFile.Name(),
+			Size: latestFile.Size(),
+			Path: localFilePath,
+		}
+
+		sftpInfo = &sftpInfoData
+
+		log.Info().Msgf("Latest file downloaded successfully from %s to %s\n", remoteFilePath, localFilePath)
+	} else {
+		log.Info().Msg("No files found in the remote directory starting with 'EIM_EDGE_BLACKLIST'")
+	}
+
+	return sftpInfo, nil
 }
 
 // SystemLineSeparator provides a platform-independent line separator
@@ -101,80 +223,12 @@ func (s SpecialistService) SaveSpecialist(specialistReq models.SpecialistRequest
 	return nil
 }
 
-//func (s SpecialistService) ExportSpecialist() error {
-//	//const directory = "/home/edw/outbox/edge"
-//	getConfig := config.GetConfig()
-//	directory := getConfig.Sftp.Export
-//	const filenamePattern = "EIM_EDGE_BLACKLIST_%s.txt"
-//
-//	// Get the current date in the required format
-//	currentDate := time.Now().Format("20060102") // yyyyMMdd format
-//
-//	// Construct the full paths for body and control files
-//	bodyFile := fmt.Sprintf(filenamePattern, currentDate)
-//	fullPathBodyFile := filepath.Join(directory, bodyFile)
-//	fullPathCtrlFile := filepath.Join(directory, "CTRL_"+bodyFile)
-//
-//	// Helper function to create and write to a file
-//	createAndWriteFile := func(path string, data *[]models.SpecialistRequest) error {
-//		file, err := os.Create(path)
-//		if err != nil {
-//			return fmt.Errorf("failed to create file %s: %w", path, err)
-//		}
-//		defer func(file *os.File) {
-//			err := file.Close()
-//			if err != nil {
-//				return
-//			}
-//		}(file)
-//
-//		if data != nil {
-//			index := 0
-//			for _, line := range *data {
-//				if index > 0 {
-//					if _, err := file.WriteString(SystemLineSeparator() + line.String()); err != nil {
-//						return fmt.Errorf("failed to write to file %s: %w", path, err)
-//					}
-//				} else {
-//					if _, err := file.WriteString(line.String()); err != nil {
-//						return fmt.Errorf("failed to write to file %s: %w", path, err)
-//					}
-//				}
-//				index++
-//			}
-//		}
-//		return nil
-//	}
-//
-//	// Create and write data to the body file
-//	if err := createAndWriteFile(fullPathBodyFile, dataSpecialist); err != nil {
-//		return err
-//	}
-//
-//	// Create the empty control file
-//	if err := createAndWriteFile(fullPathCtrlFile, nil); err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}
-
 func (s SpecialistService) ExportSpecialist(envReq string) error {
 	getConfig := config.GetConfig()
-	var selectedEnv config.SftpConfig
 
-	switch envReq {
-	case "dev":
-		selectedEnv = getConfig.Sftp.Dev
-		break
-	case "uat":
-		selectedEnv = getConfig.Sftp.Uat
-		break
-	case "pre":
-		selectedEnv = getConfig.Sftp.Pre
-		break
-	default:
-		return fmt.Errorf("invalid env value: %s", envReq)
+	selectedEnv, err := config.GetEnvSiteData(envReq)
+	if err != nil {
+		return err
 	}
 
 	const filenamePattern = "EIM_EDGE_BLACKLIST_%s.txt"
@@ -184,8 +238,11 @@ func (s SpecialistService) ExportSpecialist(envReq string) error {
 
 	// Construct the full paths for body and control files
 	bodyFile := fmt.Sprintf(filenamePattern, currentDate)
-	remoteBodyFile := filepath.Join(getConfig.Sftp.Export, bodyFile)
-	remoteCtrlFile := filepath.Join(getConfig.Sftp.Export, "CTRL_"+bodyFile)
+	remoteBodyFile := getConfig.Sftp.Export + bodyFile
+	remoteCtrlFile := getConfig.Sftp.Export + "CTRL_" + bodyFile
+
+	//remoteBodyFile := filepath.Join(getConfig.Sftp.Export, bodyFile)
+	//remoteCtrlFile := filepath.Join(getConfig.Sftp.Export, "CTRL_"+bodyFile)
 
 	// SSH configuration
 	sshConfig := &ssh.ClientConfig{
