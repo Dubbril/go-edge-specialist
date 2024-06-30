@@ -241,9 +241,6 @@ func (s SpecialistService) ExportSpecialist(envReq string) error {
 	remoteBodyFile := getConfig.Sftp.Export + bodyFile
 	remoteCtrlFile := getConfig.Sftp.Export + "CTRL_" + bodyFile
 
-	//remoteBodyFile := filepath.Join(getConfig.Sftp.Export, bodyFile)
-	//remoteCtrlFile := filepath.Join(getConfig.Sftp.Export, "CTRL_"+bodyFile)
-
 	// SSH configuration
 	sshConfig := &ssh.ClientConfig{
 		User: selectedEnv.Username,
