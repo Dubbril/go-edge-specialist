@@ -204,13 +204,14 @@ func (s SpecialistService) SaveSpecialist(specialistReq models.SpecialistRequest
 
 	// Update Specialist
 	if specialistReq.RowNo != "" {
-
-		rowNo, err := strconv.Atoi(specialistReq.RowNo)
-		if err != nil {
-			return errors.New("Cannot to convert rowNo to number with error : " + err.Error())
+		for index, value := range *dataSpecialist {
+			if value.RowNo == specialistReq.RowNo {
+				(*dataSpecialist)[index] = specialistReq
+				return nil
+			}
 		}
 
-		(*dataSpecialist)[rowNo] = specialistReq
+		return fmt.Errorf("rowNo %v not found in specialist request", specialistReq.RowNo)
 
 	} else {
 		// Add Specialist
@@ -293,6 +294,7 @@ func (s SpecialistService) ExportSpecialist(envReq string) error {
 			for _, line := range *data {
 				var content string
 				if index > 0 {
+					line.RowNo = strconv.Itoa(index)
 					content = SystemLineSeparator() + line.String()
 				} else {
 					content = line.String()
