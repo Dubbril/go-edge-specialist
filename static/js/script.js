@@ -4,7 +4,7 @@ function reloadPage() {
 }
 
 // Reload the page every 2 minutes (120000 milliseconds)
-setTimeout(reloadPage, 600000);
+//setTimeout(reloadPage, 600000);
 
 function generateGUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -148,7 +148,7 @@ function defaultNewSpecialistForm() {
     document.getElementById('CountryCode').value = 'TH';
     document.getElementById('CustomerType').value = 'ZZ';
     document.getElementById('Zipcode').value = '0';
-    document.getElementById('Action').value = 'R';
+    document.getElementById('Action').value = '';
     document.getElementById('OldAct').value = 'B';
     document.getElementById('Ovract').value = 'Y';
     document.getElementById('Pob').value = '';

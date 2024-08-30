@@ -276,33 +276,28 @@ func (s SpecialistService) ExportSpecialist(envReq string) error {
 		}
 	}(sftpClient)
 
-	// Helper function to create and write to a remote file
+	// Helper function to create and write to a file
 	createAndWriteRemoteFile := func(path string, data *[]models.SpecialistRequest) error {
-		file, err := sftpClient.Create(path)
-		if err != nil {
-			return fmt.Errorf("failed to create remote file %s: %w", path, err)
-		}
-		defer func(file *sftp.File) {
-			err := file.Close()
-			if err != nil {
-				return
-			}
-		}(file)
-
 		if data != nil {
 			index := 0
+			content := ""
 			for _, line := range *data {
-				var content string
 				if index > 0 {
-					line.RowNo = strconv.Itoa(index)
-					content = SystemLineSeparator() + line.String()
+					content += SystemLineSeparator() + line.String()
 				} else {
-					content = line.String()
-				}
-				if _, err := file.Write([]byte(content)); err != nil {
-					return fmt.Errorf("failed to write to remote file %s: %w", path, err)
+					content += line.String()
 				}
 				index++
+			}
+
+			err := os.WriteFile(path, []byte(content), 0644)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := os.WriteFile(path, []byte{}, 0644)
+			if err != nil {
+				return err
 			}
 		}
 		return nil
